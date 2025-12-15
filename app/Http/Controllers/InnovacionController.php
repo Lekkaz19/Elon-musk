@@ -37,11 +37,15 @@ class InnovacionController extends Controller
      */
     public function show(Innovacion $innovacione)
     {
-        $comments = $innovacione->comments()
+        $comments = $innovacione->comentarios()
             ->where('approved', true)
             ->orderBy('created_at', 'desc')
             ->get();
-        return view('innovaciones.show', ['innovacion' => $innovacione, 'comments' => $comments]);
+        
+        return view('innovaciones.show', [
+            'innovacion' => $innovacione, 
+            'comments' => $comments
+        ]);
     }
 
     /**

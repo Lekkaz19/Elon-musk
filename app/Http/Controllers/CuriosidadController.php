@@ -42,9 +42,17 @@ class CuriosidadController extends Controller
         return redirect()->route('admin.curiosidades.index')->with('success', 'Creado con éxito.');
     }
 
-    public function show(Curiosidad $curiosidad)
+    public function show(Curiosidad $curiosidade)
     {
-        return view('curiosidades.show', compact('curiosidad'));
+        $comments = $curiosidade->comentarios()
+            ->where('approved', true)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        return view('curiosidades.show', [
+            'curiosidad' => $curiosidade, 
+            'comments' => $comments
+        ]);
     }
     
     // Agrega métodos edit/update/destroy si faltan, usando la misma lógica de imagen

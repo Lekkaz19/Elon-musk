@@ -14,7 +14,7 @@
                     <x-nav-link :href="route('biografia-eventos.index')" :active="request()->routeIs('biografia-eventos.*')" class="text-gray-300 hover:text-white">Línea de Tiempo</x-nav-link>
                     
                     @if(Auth::check() && Auth::user()->isAdmin())
-                        <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" class="text-yellow-400 font-bold ml-4">Panel de Control</x-nav-link>
+<x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-yellow-400 font-bold ml-4">Panel de Control</x-nav-link>
                     @endif
                 </div>
             </div>
@@ -44,7 +44,7 @@
             <x-responsive-nav-link :href="route('innovaciones.index')" class="text-gray-300">Innovaciones</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('biografia-eventos.index')" class="text-gray-300">Línea de Tiempo</x-responsive-nav-link>
             
-            @if(Auth::check() && Auth::user()->isAdmin()) <x-responsive-nav-link :href="route('admin.dashboard')" class="text-yellow-400">Panel Admin</x-responsive-nav-link> @endif
+                <x-responsive-nav-link :href="route('dashboard')" class="text-yellow-400">Panel de Control</x-responsive-nav-link>
         </div>
         <div class="pt-4 pb-1 border-t border-gray-700"><div class="px-4"><div class="font-medium text-base text-white">{{ Auth::user()->name }}</div></div><div class="mt-3 space-y-1"><x-responsive-nav-link :href="route('profile.edit')" class="text-gray-300">Perfil</x-responsive-nav-link><form method="POST" action="{{ route('logout') }}"> @csrf<x-responsive-nav-link :href="route('logout')" class="text-gray-300" onclick="event.preventDefault(); this.closest('form').submit();">Cerrar Sesión</x-responsive-nav-link></form></div></div>
     </div>

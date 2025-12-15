@@ -37,11 +37,15 @@ class BiografiaEventoController extends Controller
      */
     public function show(BiografiaEvento $biografia_evento)
     {
-        $comments = $biografia_evento->comments()
+        $comments = $biografia_evento->comentarios()
             ->where('approved', true)
             ->orderBy('created_at', 'desc')
             ->get();
-        return view('biografia-eventos.show', ['evento' => $biografia_evento, 'comments' => $comments]);
+        
+        return view('biografia-eventos.show', [
+            'evento' => $biografia_evento, 
+            'comments' => $comments
+        ]);
     }
 
     /**
