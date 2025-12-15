@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 use App\Models\Innovacion;
 
@@ -31,23 +32,21 @@ class InnovacionController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'image_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $data = $request->only(['title', 'description']);
         $data['created_by'] = auth()->id();
 
         if ($request->hasFile('image_url')) {
-            $path = $request->file('image_url')->store('public/innovaciones');
-            $data['image_url'] = \Illuminate\Support\Facades\Storage::url($path);
+            $path = $request->file('image_url')->store('innovaciones', 'public');
+            $data['image_url'] = $path;
         }
 
         Innovacion::create($data);
-
-        return redirect()->route('admin.innovaciones.index')->with('success', 'Innovacion created successfully.');
+        return redirect()->route('admin.innovaciones.index')->with('success', 'Creado correctamente');
     }
 
     /**
@@ -71,27 +70,25 @@ class InnovacionController extends Controller
      */
     public function update(Request $request, Innovacion $innovacione)
     {
-        $request->validate([
+        $data = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'image_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $data = $request->only(['title', 'description']);
-
         if ($request->hasFile('image_url')) {
             // Delete old image
-            if ($innovacione->image_url) {
-                \Illuminate\Support\Facades\Storage::delete(str_replace('/storage', 'public', $innovacione->image_url));
+            if ($innovacione->image_url && Storage::disk('public')->exists($innovacione->image_url)) {
+                Storage::disk('public')->delete($innovacione->image_url);
             }
 
-            $path = $request->file('image_url')->store('public/innovaciones');
-            $data['image_url'] = \Illuminate\Support\Facades\Storage::url($path);
+            $path = $request->file('image_url')->store('innovaciones', 'public');
+            $data['image_url'] = $path;
         }
 
         $innovacione->update($data);
 
-        return redirect()->route('admin.innovaciones.index')->with('success', 'Innovacion updated successfully.');
+        return redirect()->route('admin.innovaciones.index')->with('success', 'Actualizado correctamente');
     }
 
     /**
@@ -100,7 +97,7 @@ class InnovacionController extends Controller
     public function destroy(Innovacion $innovacione)
     {
         if ($innovacione->image_url) {
-            \Illuminate\Support\Facades\Storage::delete(str_replace('/storage', 'public', $innovacione->image_url));
+            Storage::disk('public')->delete($innovacione->image_url);
         }
         $innovacione->delete();
 

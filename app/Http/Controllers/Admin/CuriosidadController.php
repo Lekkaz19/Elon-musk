@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 use App\Models\Curiosidad;
 
@@ -31,23 +32,21 @@ class CuriosidadController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'image_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $data = $request->only(['title', 'content']);
         $data['created_by'] = auth()->id();
 
         if ($request->hasFile('image_url')) {
-            $path = $request->file('image_url')->store('public/curiosidades');
-            $data['image_url'] = \Illuminate\Support\Facades\Storage::url($path);
+            $path = $request->file('image_url')->store('curiosidades', 'public');
+            $data['image_url'] = $path;
         }
 
         Curiosidad::create($data);
-
-        return redirect()->route('admin.curiosidades.index')->with('success', 'Curiosidad created successfully.');
+        return redirect()->route('admin.curiosidades.index')->with('success', 'Creado correctamente');
     }
 
     /**
@@ -71,27 +70,25 @@ class CuriosidadController extends Controller
      */
     public function update(Request $request, Curiosidad $curiosidade)
     {
-        $request->validate([
+        $data = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'image_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $data = $request->only(['title', 'content']);
-
         if ($request->hasFile('image_url')) {
             // Delete old image
-            if ($curiosidade->image_url) {
-                \Illuminate\Support\Facades\Storage::delete(str_replace('/storage', 'public', $curiosidade->image_url));
+            if ($curiosidade->image_url && Storage::disk('public')->exists($curiosidade->image_url)) {
+                Storage::disk('public')->delete($curiosidade->image_url);
             }
 
-            $path = $request->file('image_url')->store('public/curiosidades');
-            $data['image_url'] = \Illuminate\Support\Facades\Storage::url($path);
+            $path = $request->file('image_url')->store('curiosidades', 'public');
+            $data['image_url'] = $path;
         }
 
         $curiosidade->update($data);
 
-        return redirect()->route('admin.curiosidades.index')->with('success', 'Curiosidad updated successfully.');
+        return redirect()->route('admin.curiosidades.index')->with('success', 'Actualizado correctamente');
     }
 
     /**
@@ -100,7 +97,7 @@ class CuriosidadController extends Controller
     public function destroy(Curiosidad $curiosidade)
     {
         if ($curiosidade->image_url) {
-            \Illuminate\Support\Facades\Storage::delete(str_replace('/storage', 'public', $curiosidade->image_url));
+            Storage::disk('public')->delete($curiosidade->image_url);
         }
         $curiosidade->delete();
 
