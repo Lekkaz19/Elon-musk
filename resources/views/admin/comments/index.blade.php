@@ -43,8 +43,20 @@
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <a href="{{ url($comment->commentable->getTable() . '/' . $comment->commentable->id) }}" target="_blank" class="text-indigo-600 hover:text-indigo-900">
-                                                {{ $comment->commentable->title ?? __('View Post') }}
+                                            @php
+                                                // Lógica para determinar la ruta correcta según el tipo de modelo
+                                                $route = '#';
+                                                if ($comment->commentable_type === 'App\Models\Innovacion') {
+                                                    $route = route('innovaciones.show', $comment->commentable_id);
+                                                } elseif ($comment->commentable_type === 'App\Models\Curiosidad') {
+                                                    $route = route('curiosidades.show', $comment->commentable_id);
+                                                } elseif ($comment->commentable_type === 'App\Models\BiografiaEvento') {
+                                                    $route = route('biografia-eventos.show', $comment->commentable_id);
+                                                }
+                                            @endphp
+
+                                            <a href="{{ $route }}" target="_blank" class="text-indigo-600 hover:text-indigo-900">
+                                                {{ class_basename($comment->commentable_type) }} #{{ $comment->commentable_id }}
                                             </a>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $comment->created_at->format('Y-m-d') }}</td>

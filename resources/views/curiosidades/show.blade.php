@@ -6,7 +6,18 @@
                     <h1 class="text-4xl font-extrabold mb-4">{{ $curiosidad->title }}</h1>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('Published on') }} {{ $curiosidad->created_at->format('M d, Y') }}</p>
                     
-                    <img class="w-full h-80 object-cover mb-8 rounded-lg" src="{{ $curiosidad->image_url ?? 'https://placehold.co/1200x400/333333/FFFFFF/png?text=Curiosity+Image' }}" alt="{{ $curiosidad->title }}">
+                    <img class="w-full h-80 object-cover mb-8 rounded-lg" 
+                        <?php
+                            $imageUrl = $curiosidad->image_url;
+                            if ($imageUrl && (str_starts_with($imageUrl, 'http://') || str_starts_with($imageUrl, 'https://'))) {
+                                echo 'src="' . e($imageUrl) . '"';
+                            } elseif ($imageUrl) {
+                                echo 'src="' . e(asset('storage/' . $imageUrl)) . '"';
+                            } else {
+                                echo 'src="https://placehold.co/1200x400/333333/FFFFFF/png?text=Curiosity+Image"';
+                            }
+                        ?>
+                    alt="{{ $curiosidad->title }}">
                     
                     <div class="prose dark:prose-invert max-w-none text-gray-800 dark:text-gray-200">
                         {!! $curiosidad->content !!}

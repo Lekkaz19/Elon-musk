@@ -4,67 +4,48 @@ namespace App\Http\Controllers;
 
 use App\Models\Curiosidad;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class CuriosidadController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $curiosidades = Curiosidad::latest()->paginate(9);
+        $curiosidades = Curiosidad::latest()->get();
         return view('curiosidades.index', compact('curiosidades'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('curiosidades.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required',
+            'image_url' => 'nullable|string',
+            'image_file' => 'nullable|image|max:2048',
+        ]);
+
+        $data = $request->only(['title', 'content']);
+
+        if ($request->hasFile('image_file')) {
+            $path = $request->file('image_file')->store('curiosidades', 'public');
+            $data['image_url'] = $path;
+        } elseif ($request->filled('image_url')) {
+            $data['image_url'] = $request->image_url;
+        }
+
+        Curiosidad::create($data);
+
+        return redirect()->route('admin.curiosidades.index')->with('success', 'Creado con éxito.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Curiosidad $curiosidade)
+    public function show(Curiosidad $curiosidad)
     {
-        $comments = $curiosidade->comments()
-            ->where('approved', true)
-            ->orderBy('created_at', 'desc')
-            ->get();
-        return view('curiosidades.show', ['curiosidad' => $curiosidade, 'comments' => $comments]);
+        return view('curiosidades.show', compact('curiosidad'));
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
+    
+    // Agrega métodos edit/update/destroy si faltan, usando la misma lógica de imagen
 }

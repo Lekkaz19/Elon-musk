@@ -1,29 +1,28 @@
-<x-home-layout>
-    <div class="py-12 bg-gray-100 dark:bg-gray-800">
+<x-app-layout>
+    <x-slot name="header"><h2 class="font-semibold text-xl text-gray-100">Todas las Curiosidades</h2></x-slot>
+    <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-8">{{ __('All Curiosities') }}</h1>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                @forelse ($curiosidades as $curiosidad)
-                    <div class="bg-white dark:bg-gray-900 rounded-lg shadow-lg overflow-hidden transform hover:-translate-y-2 transition-transform duration-300">
-                        <a href="{{ route('curiosidades.show', $curiosidad->id) }}">
-                            <img class="rounded-t-lg h-48 w-full object-cover" src="{{ $curiosidad->image_url ?? 'https://placehold.co/400x250/333333/FFFFFF/png?text=Curiosity' }}" alt="{{ $curiosidad->title }}" />
-                            <div class="p-5">
-                                <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">{{ $curiosidad->title }}</h5>
-                                <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">{{ Illuminate\Support\Str::limit($curiosidad->content, 100) }}</p>
-                            </div>
-                        </a>
+            @if(Auth::check() && Auth::user()->isAdmin())
+                <div class="flex justify-end mb-6"><a href="{{ route('admin.curiosidades.create') }}" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded">+ Nueva Curiosidad</a></div>
+            @endif
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                @forelse ($curiosidades as $item)
+                    <div class="bg-gray-800 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
+                        @php
+                            $src = (str_starts_with($item->image_url, 'http')) ? $item->image_url : asset('storage/' . $item->image_url);
+                            if(!$item->image_url) $src = 'https://placehold.co/600x400/333/fff?text=No+Image';
+                        @endphp
+                        <img class="w-full h-48 object-cover" src="{{ $src }}" alt="{{ $item->title }}">
+                        <div class="p-5">
+                            <h5 class="text-xl font-bold text-white mb-2">{{ $item->title }}</h5>
+                            <p class="text-gray-400 mb-4">{{ Str::limit($item->content, 80) }}</p>
+                            <a href="{{ route('curiosidades.show', $item->id) }}" class="text-blue-400 hover:underline">Leer más →</a>
+                        </div>
                     </div>
                 @empty
-                    <div class="col-span-full text-center py-12">
-                        <p class="text-gray-700 dark:text-gray-300 text-lg">{{ __('No curiosities found at the moment. Check back later!') }}</p>
-                    </div>
+                    <p class="text-white">No hay curiosidades aún.</p>
                 @endforelse
-            </div>
-
-            <div class="mt-12">
-                {{ $curiosidades->links() }}
             </div>
         </div>
     </div>
-</x-home-layout>
+</x-app-layout>

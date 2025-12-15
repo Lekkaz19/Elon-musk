@@ -6,7 +6,18 @@
                     <h1 class="text-4xl font-extrabold mb-4">{{ $evento->year }}: {{ $evento->title }}</h1>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('Published on') }} {{ $evento->created_at->format('M d, Y') }}</p>
                     
-                    <img class="w-full h-80 object-cover mb-8 rounded-lg" src="{{ $evento->image_url ?? 'https://placehold.co/1200x400/1a1a1a/FFFFFF/png?text=Bio+Event+Image' }}" alt="{{ $evento->title }}">
+                    <img class="w-full h-80 object-cover mb-8 rounded-lg"
+                        <?php
+                            $imageUrl = $evento->image_url;
+                            if ($imageUrl && (str_starts_with($imageUrl, 'http://') || str_starts_with($imageUrl, 'https://'))) {
+                                echo 'src="' . e($imageUrl) . '"';
+                            } elseif ($imageUrl) {
+                                echo 'src="' . e(asset('storage/' . $imageUrl)) . '"';
+                            } else {
+                                echo 'src="https://placehold.co/1200x400/1a1a1a/FFFFFF/png?text=Bio+Event+Image"';
+                            }
+                        ?>
+                    alt="{{ $evento->title }}">
                     
                     <div class="prose dark:prose-invert max-w-none text-gray-800 dark:text-gray-200">
                         {!! $evento->description !!}
