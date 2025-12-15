@@ -17,6 +17,13 @@ class Innovacion extends Model
         'description',
         'image_url',
         'created_by',
+        'created_at',
+        'updated_at',
+    ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function creator()

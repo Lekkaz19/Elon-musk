@@ -1,51 +1,30 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\BiografiaEventoController;
-use App\Http\Controllers\InnovacionController;
-use App\Http\Controllers\CuriosidadController;
-use App\Http\Controllers\CommentController;
+use App\Http\Controllers\{
+    DashboardController,
+    InnovacionController,
+    CuriosidadController,
+    BiografiaEventoController,
+    CommentController,
+    ProfileController,
+    HomeController // Added HomeController
+};
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Rutas Públicas
+| Rutas Públicas (Sin autenticación)
 |--------------------------------------------------------------------------
 */
-
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Biografía (público)
-Route::get('/biografia-eventos', [BiografiaEventoController::class, 'index'])->name('biografia-eventos.index');
-Route::get('/biografia-eventos/{id}', [BiografiaEventoController::class, 'show'])->name('biografia-eventos.show');
-
-// Innovaciones (público)
-Route::get('/innovaciones', [InnovacionController::class, 'index'])->name('innovaciones.index');
-Route::get('/innovaciones/{id}', [InnovacionController::class, 'show'])->name('innovaciones.show');
-
-// Curiosidades (público)
-Route::get('/curiosidades', [CuriosidadController::class, 'index'])->name('curiosidades.index');
-Route::get('/curiosidades/{id}', [CuriosidadController::class, 'show'])->name('curiosidades.show');
-
 /*
 |--------------------------------------------------------------------------
-| Rutas de Autenticación
+| Rutas de Usuario (Requieren autenticación)
 |--------------------------------------------------------------------------
 */
-
-require __DIR__.'/auth.php';
-
-/*
-|--------------------------------------------------------------------------
-| Rutas Protegidas (Usuarios Autenticados)
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware('auth')->group(function () {
-    
-    // Dashboard - RUTA CRÍTICA FALTANTE
+Route::middleware(['auth'])->group(function () {
+    // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
     // Perfil
@@ -53,32 +32,53 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
-    // Comentarios (usuarios autenticados)
+    // Ver contenido (usuarios normales también pueden ver)
+    Route::get('/innovaciones', [InnovacionController::class, 'index'])->name('innovaciones.index');
+    Route::get('/innovaciones/{innovacion}', [InnovacionController::class, 'show'])->name('innovaciones.show');
+    
+    Route::get('/curiosidades', [CuriosidadController::class, 'index'])->name('curiosidades.index');
+    Route::get('/curiosidades/{curiosidad}', [CuriosidadController::class, 'show'])->name('curiosidades.show');
+    
+    Route::get('/biografia-eventos', [BiografiaEventoController::class, 'index'])->name('biografia-eventos.index');
+    Route::get('/biografia-eventos/{biografia_evento}', [BiografiaEventoController::class, 'show'])->name('biografia-eventos.show');
+    
+    // Comentarios (usuarios normales pueden comentar)
     Route::post('/comentarios', [CommentController::class, 'store'])->name('comentarios.store');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Rutas de Administración
+| Rutas de Administrador (Requieren autenticación + permisos admin)
 |--------------------------------------------------------------------------
 */
-
-Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     
-    // Gestión de Biografía
-    Route::resource('biografia-eventos', BiografiaEventoController::class)
-        ->except(['index', 'show']);
+    // Dashboard Admin
+    Route::get('/dashboard', [DashboardController::class, 'adminDashboard'])->name('dashboard');
     
-    // Gestión de Innovaciones
-    Route::resource('innovaciones', InnovacionController::class)
-        ->except(['index', 'show']);
+    /*
+     * INNOVACIONES - CRUD Completo para Admin
+     * Estas rutas permiten: crear, editar, actualizar y eliminar innovaciones
+     */
+    Route::resource('innovaciones', InnovacionController::class)->except(['index', 'show']);
     
-    // Gestión de Curiosidades
-    Route::resource('curiosidades', CuriosidadController::class)
-        ->except(['index', 'show']);
+    /*
+     * CURIOSIDADES - CRUD Completo para Admin
+     */
+    Route::resource('curiosidades', CuriosidadController::class)->except(['index', 'show']);
     
-    // Gestión de Comentarios
-    Route::get('/comentarios', [CommentController::class, 'index'])->name('admin.comentarios.index');
-    Route::patch('/comentarios/{id}/aprobar', [CommentController::class, 'approve'])->name('admin.comentarios.aprobar');
-    Route::delete('/comentarios/{id}', [CommentController::class, 'destroy'])->name('admin.comentarios.destroy');
+    /*
+     * BIOGRAFÍA EVENTOS - CRUD Completo para Admin
+     */
+    Route::resource('biografia-eventos', BiografiaEventoController::class)->except(['index', 'show']);
+    
+    /*
+     * GESTIÓN DE COMENTARIOS
+     */
+    Route::get('/comentarios', [CommentController::class, 'index'])->name('comentarios.index');
+    Route::post('/comentarios/{comment}/approve', [CommentController::class, 'approve'])->name('comentarios.approve');
+    Route::delete('/comentarios/{comment}', [CommentController::class, 'destroy'])->name('comentarios.destroy');
 });
+
+// Rutas de autenticación (generadas por Breeze/Jetstream)
+require __DIR__.'/auth.php';

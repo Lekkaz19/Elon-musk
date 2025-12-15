@@ -4,7 +4,7 @@
             <div class="bg-white dark:bg-gray-900 overflow-hidden shadow-xl sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <h1 class="text-4xl font-extrabold mb-4">{{ $evento->year }}: {{ $evento->title }}</h1>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('Published on') }} {{ $evento->created_at->format('M d, Y') }}</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('Publicado el') }} {{ $evento->created_at ? $evento->created_at->format('d M, Y') : 'Fecha no disponible' }}</p>
                     
                     <img class="w-full h-80 object-cover mb-8 rounded-lg"
                         <?php

@@ -13,6 +13,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // Dashboard para usuario normal
         $stats = [
             'total_eventos' => BiografiaEvento::count(),
             'total_innovaciones' => Innovacion::count(),
@@ -28,5 +29,21 @@ class DashboardController extends Controller
             ->get();
 
         return view('dashboard', compact('stats', 'comentarios_recientes'));
+    }
+
+    public function adminDashboard()
+    {
+        // Dashboard para admin
+        return view('admin.dashboard', [
+            'biografiaEventos' => BiografiaEvento::count(),
+            'innovaciones' => Innovacion::count(),
+            'curiosidades' => Curiosidad::count(),
+            'comentariosPendientes' => \App\Models\Comentario::where('approved', false)->count(),
+            'ultimasInnovaciones' => Innovacion::latest()->take(5)->get(),
+            'ultimasCuriosidades' => Curiosidad::latest()->take(5)->get(),
+            'ultimosEventos' => BiografiaEvento::latest()->take(5)->get(),
+            'comentariosRecientes' => \App\Models\Comentario::with('user')->latest()->take(10)->get(),
+            'totalUsuarios' => User::count()
+        ]);
     }
 }
